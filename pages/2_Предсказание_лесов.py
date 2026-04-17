@@ -15,12 +15,12 @@ def load_model():
     try:
         model_path = hf_hub_download(
             repo_id="Scatana/cv_project",
-            filename="best.pth",
+            filename="best_model.pth",
             cache_dir="./model_cache"
         )
     except Exception as e:
         st.error(f"Не удалось загрузить модель с Hugging Face: {e}")
-        model_path = "models/best.pth"
+        model_path = "models/best_model.pth"
         if not os.path.exists(model_path):
             st.error("Модель не найдена ни на Hugging Face, ни локально.")
             return None, None
