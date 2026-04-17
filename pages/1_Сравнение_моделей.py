@@ -5,66 +5,29 @@ import os
 st.set_page_config(page_title="Обзор моделей", layout="wide")
 st.title("📊 Обзор результатов экспериментов")
 
-# Путь к папке с ассетами (предполагается, что она находится в корне проекта)
-forest_segmentation_DIR = "forest_segmentation"
+# Путь к папке с ассетами (корневая папка)
+FOREST_SEGMENTATION_DIR = "forest_segmentation"
 
-# -------------------- Показ предсказаний для 6 моделей на 5 изображениях --------------------
+# -------------------- Показ предсказаний (коллажи для каждой модели) --------------------
 st.header("🔍 Сравнение предсказаний моделей")
 st.markdown("Для каждой модели показаны предсказания на одних и тех же 5 изображениях.")
 
-INFERENCE_DIR = os.path.join(forest_segmentation_DIR, "Inference")
+INFERENCE_DIR = os.path.join(FOREST_SEGMENTATION_DIR, "Inference")
 if os.path.exists(INFERENCE_DIR):
-    # Собираем изображения для каждой модели
-    # Предполагается, что файлы названы: 1.png, 2.png, ... для модели 1 и т.д.
-    num_models = 6
-    num_images = 5
-    
-    # Создаём заголовки для столбцов: "Оригинал", "Истинная маска", "Модель 1", ..., "Модель 6"
-    cols = st.columns(num_models + 2)
-    cols[0].markdown("**Оригинал**")
-    cols[1].markdown("**Истинная маска**")
-    for i in range(num_models):
-        cols[i+2].markdown(f"**Модель {i+1}**")
-    
-    # Для каждого изображения показываем строку
-    for img_idx in range(1, num_images + 1):
-        # Предполагаем, что оригиналы и истинные маски тоже лежат в Inference?
-        # Если нет, пути нужно скорректировать.
-        # Здесь для примера предполагается, что оригинал и истинная маска также находятся в Inference.
-        orig_path = os.path.join(INFERENCE_DIR, f"orig_{img_idx}.png")
-        mask_path = os.path.join(INFERENCE_DIR, f"mask_{img_idx}.png")
-        
-        if os.path.exists(orig_path) and os.path.exists(mask_path):
-            orig_img = Image.open(orig_path)
-            mask_img = Image.open(mask_path)
+    cols = st.columns(3)
+    for model_idx in range(1, 7):
+        img_path = os.path.join(INFERENCE_DIR, f"{model_idx}.png")
+        if os.path.exists(img_path):
+            with cols[(model_idx-1) % 3]:
+                st.image(Image.open(img_path), caption=f"Модель {model_idx}", use_container_width=True)
         else:
-            # Если файлов нет, создаём заглушку
-            orig_img = None
-            mask_img = None
-        
-        cols = st.columns(num_models + 2)
-        if orig_img:
-            cols[0].image(orig_img, use_container_width=True)
-        else:
-            cols[0].write("Нет данных")
-        if mask_img:
-            cols[1].image(mask_img, use_container_width=True)
-        else:
-            cols[1].write("Нет данных")
-        
-        for model_idx in range(1, num_models + 1):
-            pred_path = os.path.join(INFERENCE_DIR, f"{model_idx}_{img_idx}.png")
-            if os.path.exists(pred_path):
-                pred_img = Image.open(pred_path)
-                cols[model_idx+1].image(pred_img, use_container_width=True)
-            else:
-                cols[model_idx+1].write("Нет данных")
+            st.write(f"Нет данных для модели {model_idx}")
 else:
     st.warning("Папка с предсказаниями не найдена. Поместите изображения в 'forest_segmentation/Inference/'.")
 
 # -------------------- Матрицы ошибок --------------------
 st.header("📉 Матрицы ошибок")
-MATRIX_DIR = os.path.join(ASSETS_DIR, "Matrix_error")
+MATRIX_DIR = os.path.join(FOREST_SEGMENTATION_DIR, "Matrix_error")
 if os.path.exists(MATRIX_DIR):
     matrix_cols = st.columns(2)
     for model_idx in range(1, 7):
@@ -75,11 +38,11 @@ if os.path.exists(MATRIX_DIR):
             else:
                 st.write(f"Нет матрицы для эксперимента {model_idx}")
 else:
-    st.warning("Папка с матрицами ошибок не найдена. Поместите изображения в 'forest_segmentation/Matrix_error/'.")
+    st.warning("Папка с матрицами ошибок не найдена.")
 
 # -------------------- Графики и таблица --------------------
 st.header("📈 Графики и таблица метрик")
-METRICS_DIR = os.path.join(ASSETS_DIR, "Metrics")
+METRICS_DIR = os.path.join(FOREST_SEGMENTATION_DIR, "Metrics")
 if os.path.exists(METRICS_DIR):
     # Графики для каждой модели
     metrics_cols = st.columns(2)
@@ -98,4 +61,4 @@ if os.path.exists(METRICS_DIR):
     else:
         st.write("Файл сводной таблицы не найден.")
 else:
-    st.warning("Папка с графиками не найдена. Поместите изображения в 'forest_segmentation/Metrics/'.")
+    st.warning("Папка с графиками не найдена.")
